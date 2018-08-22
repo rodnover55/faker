@@ -370,3 +370,39 @@ func TestUnexportedFieldStruct(t *testing.T) {
 	}
 	fmt.Printf(" A value: %+v , SampleStruct Value: %+v  ", a, a)
 }
+
+func TestExtend(t *testing.T) {
+	// This test is to ensure that faker can be extended new providers
+
+	a := struct {
+		ID string `faker:"test"`
+	}{}
+
+	err := AddProvider("test", func() string {
+		return "test"
+	})
+
+	if err != nil {
+		t.Error("Expected Not Error, But Got: ", err)
+	}
+
+	err = FakeData(&a)
+
+	if err != nil {
+		t.Error("Expected Not Error, But Got: ", err)
+	}
+
+	if a.ID != "test" {
+		t.Error("ID should be equal test value")
+	}
+}
+
+func TestTagAlreadyExists(t *testing.T) {
+	// This test is to ensure that existing tag cannot be rewritten
+
+	err := AddProvider(Email, func() {})
+
+	if err == nil || err.Error() != ErrTagAlreadyExists {
+		t.Error("Expected ErrTagAlreadyExists Error,  But Got: ", err)
+	}
+}
